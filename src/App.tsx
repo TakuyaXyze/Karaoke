@@ -1,6 +1,6 @@
 // --- App.tsx: アプリ本体（マイク開始/停止、ピアノロール、ファイル抽出） ----
 
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import PianoRoll from "./components/PianoRoll";
 //import type PianoRoll from "./components/PianoRoll";
 import type { Note } from "./components/PianoRoll";
