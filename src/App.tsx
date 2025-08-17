@@ -21,6 +21,7 @@ export default function App() {
   const [noteDisplayMode, setNoteDisplayMode] = useState<'noteName' | 'solfege'>('noteName');
   const [selectedPart, setSelectedPart] = useState<Part>("soprano");
   const [isPlaying, setIsPlaying] = useState(false);
+  const [micSensitivity, setMicSensitivity] = useState(0.12); // YIN threshold
   const [showGenerator, setShowGenerator] = useState(false);
 
   const [playheadTime, setPlayheadTime] = useState<number | null>(null);
@@ -137,7 +138,7 @@ export default function App() {
       // 再生ヘッド同期用にウィンドウを自動スクロール（右端追従）
       const right = Math.max(10, p.tSec);
       setWindowSec([Math.max(0, right - 10), right]);*/
-    }, { minFreq: 50, maxFreq: 1200, threshold: 0.12, probabilityThreshold: 0.1 });
+    }, { minFreq: 50, maxFreq: 1200, threshold: micSensitivity, probabilityThreshold: 0.1 });
 
     // start に offset を渡す（PitchTracker 内部で startedAt = ac.currentTime - offset）
     pitchTrackerRef.current.start(offsetSeconds);
@@ -230,13 +231,12 @@ export default function App() {
     { label: "C", time: 80 },
     { label: "D", time: 111.5 },
     { label: "E", time: 125 },
-    { label: "あさだ", time: 145 },
+    { label: "朝だ", time: 145 },
     { label: "F", time: 155 },
     { label: "G", time: 181 },
-    { label: "理屈抜きの", time: 211 },
+    { label: "理屈抜き", time: 211 },
     { label: "H", time: 225 },
     { label: "H'", time: 235 },
-    { label: "H''", time: 245 },
   ];
 
   // 9: レイアウト描画
@@ -274,6 +274,20 @@ export default function App() {
             <option value="solfege">階名 (ドレミ)</option>
           </select>
         </label>
+        <label style={{ display: "inline-flex", alignItems: "center", gap: 4 }}>
+          マイク感度:
+          <input
+            type="range"
+            min="0.01"
+            max="0.20"
+            step="0.01"
+            value={micSensitivity}
+            onChange={(e) => setMicSensitivity(parseFloat(e.target.value))}
+            disabled={isPlaying}
+            style={{ marginLeft: 4, verticalAlign: "middle" }}
+          />
+          <span style={{ fontVariantNumeric: "tabular-nums", minWidth: "2.5em" }}>{micSensitivity.toFixed(2)}</span>
+        </label>
         {/* 各パートのクイック選択ボタン */}
         {/*
         {PARTS.map(p => (
@@ -289,7 +303,8 @@ export default function App() {
         <button onClick={() => stopPractice()} disabled={!isPlaying} style={{ padding: "8px 12px", borderRadius: 8 }}>
           停止
         </button>
-
+      </div>
+      <div style={{ display: "flex", gap: 8, flexWrap: "wrap", alignItems: "center" }}>
         {/* 頭出しボタン群 */}
         {headButtons.map(h => (
           <button key={h.label} onClick={() => {
