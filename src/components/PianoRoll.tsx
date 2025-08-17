@@ -1,6 +1,6 @@
 // --- PianoRoll.tsx: ピアノロール風の音程バー描画 + ライブF0オーバーレイ ---
 
-import React, { useEffect, useRef } from "react";
+import { useEffect, useRef } from "react";
 import { midiToNoteName, hzToMidi, midiToSolfeggio } from "../utils/music";
 
 // ノートデータ型（手動入力/抽出の両方で使う）
@@ -143,34 +143,13 @@ export default function PianoRoll(props: Props) {
 
     }, [props.width, props.height, props.notes, props.live, props.timeWindow, props.playheadTime, props.noteDisplayMode]);
 
-    // 12: クリック/タップでノートを追加（超最小）
-    function handlePointer(e: React.PointerEvent<HTMLCanvasElement>) {
-        if (!props.onAddNote) return;
-        const rect = (e.target as HTMLCanvasElement).getBoundingClientRect();
-        const x = e.clientX - rect.left;
-        const y = e.clientY - rect.top;
-
-        const [t0, t1] = props.timeWindow;
-        const t = t0 + (x / rect.width) * (t1 - t0);
-
-        const minMidi = 48, maxMidi = 84;
-        const m = maxMidi - (y / rect.height) * (maxMidi - minMidi);
-
-        props.onAddNote({
-            id: Math.random().toString(36).slice(2),
-            start: t,
-            duration: 0.5,   // デフォルト0.5秒
-            midi: Math.round(m),
-        });
-    }
-
     // 13: タッチ/ペン/マウスに一発対応
     return (
         <canvas
             ref={ref}
             width={props.width}
             height={props.height}
-            onPointerDown={handlePointer}
+            //onPointerDown={handlePointer}
             style={{ touchAction: "none", background: "#111", borderRadius: 8 }}
         />
     );
