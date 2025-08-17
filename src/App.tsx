@@ -211,8 +211,10 @@ export default function App() {
     { label: "C", time: 80 },
     { label: "D", time: 111.5 },
     { label: "E", time: 125 },
+    { label: "あさだ", time: 145 },
     { label: "F", time: 155 },
     { label: "G", time: 181 },
+    { label: "理屈抜きの", time: 211 },
     { label: "H", time: 225 },
     { label: "H'", time: 235 },
   ];
@@ -246,7 +248,7 @@ export default function App() {
           </select>
         </label>
         <label>
-          ノート表示:
+          音階表示:
           <select value={noteDisplayMode} onChange={(e) => setNoteDisplayMode(e.target.value as 'noteName' | 'solfege')} style={{ marginLeft: 8 }} disabled={isPlaying}>
             <option value="noteName">音名 (C4)</option>
             <option value="solfege">階名 (ドレミ)</option>
@@ -303,7 +305,7 @@ export default function App() {
         仕様上、不要な音もバーに含まれています。無視してください。音程が間違っている場合は、僕に連絡ください。
       </p>
       <p style={{ opacity: 0.8 }}>
-        追加機能の要望も、同様にご連絡ください。¥1000~で受託します。
+        追加機能の要望も、同様にご連絡ください。
       </p>
     </div >
   );
