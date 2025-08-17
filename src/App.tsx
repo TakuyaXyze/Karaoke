@@ -24,6 +24,7 @@ export default function App() {
   const [showGenerator, setShowGenerator] = useState(false);
 
   const [playheadTime, setPlayheadTime] = useState<number | null>(null);
+  const [isAutoScrolling, setIsAutoScrolling] = useState(true);
 
   // 2: オーディオ／トラッカー
   const acRef = useRef<AudioContext | null>(null);
@@ -81,6 +82,10 @@ export default function App() {
 
   // 5: 再生開始（マイク解析と同期） - offsetSeconds を与えればその時点から再生＆解析開始
   async function startPractice(offsetSeconds = 0) {
+
+    // 再生開始時に自動スクロールを有効化
+    setIsAutoScrolling(true);
+
     // AudioContext を用意（ユーザー操作の直後に呼ぶ前提）
     const ac = acRef.current ?? createAudioContext();
     acRef.current = ac;
@@ -187,9 +192,16 @@ export default function App() {
           const currentPlayheadTime = elapsed + playOffsetRef.current;
           setPlayheadTime(currentPlayheadTime);
 
+          /*
           // 再生ヘッド同期用にウィンドウを自動スクロール（右端追従）
           const right = Math.max(10, currentPlayheadTime);
           setWindowSec([Math.max(0, right - 10), right]);
+          */
+          // 自動スクロールが有効な場合のみウィンドウを更新
+          if (isAutoScrolling) {
+            const right = Math.max(10, currentPlayheadTime);
+            setWindowSec([Math.max(0, right - 10), right]);
+          }
         }
         rafRef.current = requestAnimationFrame(loop);
       };
@@ -202,7 +214,14 @@ export default function App() {
     }
 
     return () => { if (rafRef.current) cancelAnimationFrame(rafRef.current); };
-  }, [isPlaying]);
+  }, [isPlaying, isAutoScrolling]);
+
+  // PianoRollからのスクロールイベントを受け取るハンドラ
+  const handleWindowChange = (newWindow: [number, number]) => {
+    // 手動でスクロールされたら、自動スクロールを無効にする
+    setIsAutoScrolling(false);
+    setWindowSec(newWindow);
+  };
 
   // 8: UI内で使う小さなヘルパ（頭出しボタン）
   const headButtons = [
@@ -295,9 +314,19 @@ export default function App() {
       <div style={{ marginTop: 12 }}>
         {/* PianoRoll に playheadTime を渡して縦線を描画。timeWindow は state に従う */}
         {/*
-        <PianoRoll width={size.w} height={size.h} notes={notes} live={live} timeWindow={windowSec} playheadTime={playheadTime ?? null} onAddNote={(n) => setNotes(prev => [...prev, n])} noteDisplayMode={noteDisplayMode} />
-        */}
         <PianoRoll width={size.w} height={size.h} notes={notes} live={live} timeWindow={windowSec} playheadTime={playheadTime} onAddNote={(n) => setNotes(prev => [...prev, n])} noteDisplayMode={noteDisplayMode} />
+        */}
+        <PianoRoll
+          width={size.w}
+          height={size.h}
+          notes={notes}
+          live={live}
+          timeWindow={windowSec}
+          playheadTime={playheadTime}
+          onAddNote={(n) => setNotes(prev => [...prev, n])}
+          noteDisplayMode={noteDisplayMode}
+          onTimeWindowChange={handleWindowChange} // プロパティを追加
+        />
       </div>
       <p style={{ opacity: 0.8 }}>
         選択した音源の事前解析データを読み込みます。練習開始を押すとお手本音源の再生とあなたの声のマイク解析が同期して開始します。

@@ -23,11 +23,17 @@ type Props = {
     playheadTime?: number | null;     // 再生ヘッド時刻（曲時刻）
     onAddNote?: (n: Note) => void; // タップ/クリックで新規ノート追加
     noteDisplayMode: 'noteName' | 'solfege';
+    onTimeWindowChange?: (window: [number, number]) => void; // 横スクロール時に親に通知
 };
 
 export default function PianoRoll(props: Props) {
     // 1: Canvas参照
     const ref = useRef<HTMLCanvasElement | null>(null);
+
+    // ドラッグによるスクロール処理用のref
+    const isDraggingRef = useRef(false);
+    const dragStartXRef = useRef(0);
+    const dragStartWindowRef = useRef<[number, number]>([0, 10]);
 
     // 2: 尺度（時間→X, 音高→Y）を定義
     const minMidi = 30;  // C3
@@ -143,6 +149,35 @@ export default function PianoRoll(props: Props) {
 
     }, [props.width, props.height, props.notes, props.live, props.timeWindow, props.playheadTime, props.noteDisplayMode]);
 
+    // 12: ポインターイベント処理
+    const handlePointerDown = (e: React.PointerEvent<HTMLCanvasElement>) => {
+        isDraggingRef.current = true;
+        dragStartXRef.current = e.clientX;
+        dragStartWindowRef.current = [...props.timeWindow]; // 現在の表示範囲をコピー
+        e.currentTarget.setPointerCapture(e.pointerId);
+    };
+
+
+    const handlePointerMove = (e: React.PointerEvent<HTMLCanvasElement>) => {
+        if (!isDraggingRef.current) return;
+
+        const dx = e.clientX - dragStartXRef.current;
+        const [t0, t1] = dragStartWindowRef.current;
+        const timePerPixel = (t1 - t0) / props.width;
+        const dt = dx * timePerPixel;
+
+        // 新しいウィンドウ範囲を計算 (左にドラッグで進む、右にドラッグで戻る)
+        const newT0 = Math.max(0, t0 - dt);
+        const newT1 = newT0 + (t1 - t0);
+
+        props.onTimeWindowChange?.([newT0, newT1]);
+    };
+
+    const handlePointerUp = (e: React.PointerEvent<HTMLCanvasElement>) => {
+        isDraggingRef.current = false;
+        e.currentTarget.releasePointerCapture(e.pointerId);
+    };
+
     // 13: タッチ/ペン/マウスに一発対応
     return (
         <canvas
@@ -150,6 +185,10 @@ export default function PianoRoll(props: Props) {
             width={props.width}
             height={props.height}
             //onPointerDown={handlePointer}
+            onPointerDown={handlePointerDown}
+            onPointerMove={handlePointerMove}
+            onPointerUp={handlePointerUp}
+            onPointerLeave={handlePointerUp} // キャンバスから出た時もドラッグ終了
             style={{ touchAction: "none", background: "#111", borderRadius: 8 }}
         />
     );
