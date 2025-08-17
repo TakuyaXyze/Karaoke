@@ -217,6 +217,7 @@ export default function App() {
     { label: "理屈抜きの", time: 211 },
     { label: "H", time: 225 },
     { label: "H'", time: 235 },
+    { label: "H''", time: 245 },
   ];
 
   // 9: レイアウト描画
@@ -234,7 +235,7 @@ export default function App() {
 
   return (
     <div style={{ color: "white", background: "#0b0b0b", height: "100vh", padding: 12, fontFamily: "system-ui, sans-serif" }}>
-      <h1 style={{ margin: "8px 0 4px" }}>🎤 ご武運を <span style={{ fontSize: 15 }}>引退した僕の分まで頑張ってください</span></h1>
+      <h1 style={{ margin: "8px 0 4px" }}>🎤 ご武運を <span style={{ fontSize: 15 }}>僕の分まで頑張ってください</span></h1>
       {/*
       <p style={{ opacity: 0.8, marginTop: 0 }}>
         スマホ対応・マイク解析・ピアノロール表示・ファイルからメロディ抽出（簡易）
