@@ -38,6 +38,7 @@ export default function App() {
   // 再生管理（再生が始まった時点の ac.currentTime）
   const playStartAtRef = useRef<number | null>(null);
   const playOffsetRef = useRef<number>(0); // 再生開始オフセット（秒）
+  //const pauseTimeRef = useRef<number>(0); //一時停止/再開位置を管理
 
   // 3: 初回レンダ時に public/ の選択中パート用 JSON を読み込む（もしくは選択時に読み込む）
   useEffect(() => {
@@ -129,9 +130,9 @@ export default function App() {
     // 5-7: PitchTracker を生成し startOffset を渡して start()（これで tSec は曲時刻と一致）
     pitchTrackerRef.current?.stop();
     pitchTrackerRef.current = new PitchTracker(ac, stream, (p) => {
-      // ライブ点を貯める（30秒分だけ保持）
+      // ライブ点を貯める（300秒分だけ保持）
       setLive(prev => {
-        const next = [...prev, p].filter(x => p.tSec - x.tSec <= 30);
+        const next = [...prev, p].filter(x => p.tSec - x.tSec <= 300);
         return next;
       });
       /*
@@ -254,7 +255,7 @@ export default function App() {
 
   return (
     <div style={{ color: "white", background: "#0b0b0b", height: "100vh", padding: 12, fontFamily: "system-ui, sans-serif" }}>
-      <h1 style={{ margin: "8px 0 4px" }}>🎤 ご武運を <span style={{ fontSize: 15 }}>僕の分まで頑張ってください</span></h1>
+      <h1 style={{ margin: "8px 0 4px" }}>🎤ご武運を <span style={{ fontSize: 15 }}>頑張ってください</span></h1>
       {/*
       <p style={{ opacity: 0.8, marginTop: 0 }}>
         スマホ対応・マイク解析・ピアノロール表示・ファイルからメロディ抽出（簡易）

@@ -27,7 +27,7 @@ export default function FileMelodyExtractor({ onNotes }: Props) {
             const ac = new (window.AudioContext || (window as any).webkitAudioContext)();
             const audio = await ac.decodeAudioData(arr.slice(0));
 
-            // 3: モノラル化（片chを取る簡易版）
+            // 3: モノラル化
             const ch0 = audio.getChannelData(0);
             const sr = audio.sampleRate;
 
